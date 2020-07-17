@@ -12,7 +12,7 @@ local mt = { __index = _M }
 function _M.all(self)
     local count = customers:incr("count",0)
     local result = {}
-    for i=1, count, 1 do
+    for i=1, count or 1, 1 do
         local info = customers:get(tostring(i))
         if info ~= nil then
             local json = cjson.decode(info)
