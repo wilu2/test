@@ -1,0 +1,162 @@
+{
+    "openapi": "3.0.3",
+    "info": {
+      "title": "会员管理系统",
+      "version": "0.0.1"
+    },
+    "paths": {
+      "/customers": {
+        "get": {
+          "summary": "获取所有会员信息",
+          "responses": {
+            "200": {
+              "description": "ok",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "array",
+                    "items": {
+                      "allOf": [
+                        {
+                          "$ref": "#/components/schemas/GeneratedId"
+                        },
+                        {
+                          "$ref": "#/components/schemas/CustomersInfo"
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "post": {
+          "summary": "添加会员",
+          "requestBody": {
+            "description": "会员信息",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CustomersInfo"
+                }
+              }
+            }
+          },
+          "responses": {
+            "200": {
+              "description": "正常返回",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/GeneratedId"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/customers/{id}": {
+        "get": {
+          "summary": "获取会员信息",
+          "parameters": [
+            {
+              "in": "path",
+              "name": "id",
+              "required": true,
+              "schema": {
+                "type": "integer"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "正常返回",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/CustomersInfo"
+                  }
+                }
+              }
+            },
+            "404": {
+              "description": "会员不存在"
+            }
+          }
+        },
+        "put": {
+          "summary": "修改会员信息",
+          "parameters": [
+            {
+              "in": "path",
+              "name": "id",
+              "required": true,
+              "schema": {
+                "type": "integer"
+              }
+            }
+          ],
+          "requestBody": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CustomersInfo"
+                }
+              }
+            }
+          },
+          "responses": {
+            "200": {
+              "description": "OK"
+            }
+          }
+        },
+        "delete": {
+          "summary": "删除会员",
+          "parameters": [
+            {
+              "in": "path",
+              "name": "id",
+              "required": true,
+              "schema": {
+                "type": "integer"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "OK"
+            }
+          }
+        }
+      }
+    },
+    "components": {
+      "schemas": {
+        "GeneratedId": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "integer",
+              "description": "会员ID"
+            }
+          }
+        },
+        "CustomersInfo": {
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string",
+              "description": "姓名"
+            },
+            "phone": {
+              "type": "string",
+              "description": "手机号"
+            }
+          }
+        }
+      }
+    }
+  }
