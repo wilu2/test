@@ -1,3 +1,4 @@
+local cjson = require("cjson.safe")
 local db = require("db")
 ngx.req.discard_body()
 
@@ -8,5 +9,5 @@ if info == nil then
     ngx.status = 404
 else
     ngx.header["Content-Type"] = "application/json"
-    ngx.print(info)
+    ngx.print(cjson.encode(info))
 end
