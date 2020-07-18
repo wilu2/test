@@ -18,6 +18,29 @@ _M._INNER = {}
 
 local mt = { __index = _M }
 
+function _M.new(opts)
+    opts = opts or {}
+    local unit_name = opts.unit_name
+    local write_log = (nil == opts.write_log) and true or opts.write_log
+    local header = opts.header
+    local host = opts.host
+    local port = opts.port or 80
+    return setmetatable({ 
+        header = header ,
+        host = host,
+        port = port,
+        start_time = ngx.now(), 
+        unit_name = unit_name,
+        write_log = write_log, 
+        _test_inits = opts.test_inits,  
+        processing = nil, 
+        count = 0,
+        count_fail = 0, 
+        count_succ = 0,                 
+        mock_func = {} 
+    }, mt)
+end
+
 local function generate_validator_from_openapi_json(self, openapi)
     local validators = {}
     for api, methods in pairs(openapi.paths) do
@@ -53,12 +76,12 @@ function _M.init_schema_from_openapi_url(self, url)
     local res, err = httpc:request_uri(request_url)
     if err then
         local msg = table.concat({"init_schema_from_openapi_url> ", "get ", request_url, " failed: ", err});
-        assert(false, msg)
+        self:exit(msg)
     else
         json_body, err = cjson.decode(res.body)
         if not json_body then
             local msg = table.concat({"init_schema_from_openapi_url> not a json response: ", res.body})
-            assert(false, msg)
+            self:exit(msg)
         end
     end
     self._INNER.validators =  generate_validator_from_openapi_json(self, json_body)
@@ -71,39 +94,17 @@ function _M.init_schema_from_openapi_file(self, file_path)
 
     if openapi_str == nil then 
         local msg = table.concat({"init_schema_from_openapi_file> load ", file_path, " failed"})
-        assert(false, msg)
+        self:exit(msg)
     end
 
     local json_body, err = cjson.decode(openapi_str)
     if not json_body then
         local msg = table.concat({"init_schema_from_openapi_file> not a json file: ", res.body})
-        assert(false, msg)
+        self:exit(msg)
     end
 
     self._INNER.validators =  generate_validator_from_openapi_json(self, json_body)
 
-end
-function _M.new(opts)
-    opts = opts or {}
-    local unit_name = opts.unit_name
-    local write_log = (nil == opts.write_log) and true or opts.write_log
-    local header = opts.header
-    local host = opts.host
-    local port = opts.port or 80
-    return setmetatable({ 
-        header = header ,
-        host = host,
-        port = port,
-        start_time = ngx.now(), 
-        unit_name = unit_name,
-        write_log = write_log, 
-        _test_inits = opts.test_inits,  
-        processing = nil, 
-        count = 0,
-        count_fail = 0, 
-        count_succ = 0,                 
-        mock_func = {} 
-    }, mt)
 end
 
 function _M._log(self, color, ...)
@@ -168,6 +169,11 @@ function _M.log_finish_fail(self, ...)
     self:_log("red", "fail", unpack(log))
 end
 
+function _M.exit(self, msg)
+    self:log_finish_fail(msg)
+    ngx.exit(1)
+end
+
 function _M.log_finish_succ(self, ...)
     if not self.write_log then
         return
@@ -175,9 +181,9 @@ function _M.log_finish_succ(self, ...)
 
     local log = { ... }
     table.insert(log, "\n")
-
     self:_log_standard_head(self)
     self:_log("green", unpack(log))
+
 end
 
 function _M._init_test_units(self)
@@ -281,7 +287,7 @@ end
 -- assert function added by yangguang_wen@intsig.net
 function _M.assert_true(self, condition)
     if not condition then
-       assert(false, "assert_true> failed")
+       self:exit("assert_true> failed")
     else
         self:log_finish_succ("assert_true> PASS")
     end
@@ -289,7 +295,7 @@ end
 
 function _M.assert_false(self, condition)
     if condition then
-        assert(false, "assert_false> failed")
+        self:exit("assert_false> failed")
      else
          self:log_finish_succ("assert_false> PASS")
      end
@@ -300,12 +306,12 @@ function _M.assert_eq(self, val1, val2)
     self:_log(val1)
     if type(val1) ~= type(val2) then
         local msg = table.concat({"assert_eq> expect type ",  type(val1), ", but got type ", type(val2)})
-        assert(false, msg)
+        self:exit(msg)
     end
 
     if val1 ~= val2 then
         local msg = table.concat({"assert_eq> expect ", val1, ", but got ", val2})
-        assert(false, msg)
+        self:exit(msg)
     end
     local msg = table.concat({"assert_eq> expect ", val1, ", got ", val2, ", PASS"})
     self:log_finish_succ(msg)
@@ -315,7 +321,7 @@ function _M.assert_ne(self, val1, val2)
 
     if val1 == val2 then
         local msg = table.concat({"assert_ne> not expect ", val1, ", but got ", val2, ", falied"})
-        assert(false, msg);
+        self:exit(msg);
     else 
         local msg = table.concat({"assert_ne> ", val1, " is not equal to ", val2, ", PASS"})
         self:log_finish_succ(msg)
@@ -334,7 +340,7 @@ local function request(self, url, opts, method)
     })
     if err then 
         local msg = table.concat({method, " ", request_url, " failed: ", err});
-        assert(false, msg);
+        self:exit(msg);
     else
         local msg = table.concat({method, " ", request_url, " OK"});
         self:log_finish_succ(msg)
@@ -360,12 +366,12 @@ end
 
 function _M.response_have_status(self, status_code)
     if self._INNER.res == nil then 
-        assert(false, "response_have_status> no response")
+        self:exit("response_have_status> no response")
     end
 
     if self._INNER.res.status ~= status_code then
         local msg = table.concat( {"response_have_status> expect ", status_code, " but got ", self._INNER.res.status })
-        assert(false, msg);
+        self:exit(msg);
     else
         local msg = table.concat( {"response_have_status> expect ", status_code, " got ", self._INNER.res.status , ", PASS"})
         self:log_finish_succ(msg)
@@ -374,30 +380,30 @@ end
 
 function _M.response_validate_schema(self, operationId, status_code)
     if self._INNER.res == nil then 
-        assert(false, "response_validate_schema> no response")
+        self:exit("response_validate_schema> no response")
     end
 
     if self._INNER.res.body == nil then 
-        assert(false, "response_validate_schema> no response body")
+        self:exit("response_validate_schema> no response body")
     end
 
     local json_body, err = cjson.decode(self._INNER.res.body)
     if not json_body then
         local msg = table.concat({"response_validate_schema> not a json response: ", self._INNER.res.body})
-        assert(false, msg)
+        self:exit(msg)
     end
 
     status_code = status_code or self._INNER.res.status
     local check = self._INNER.validators[table.concat({operationId, "__", status_code})]
     if check == nil then
         local msg = table.concat({"response_validate_schema> no schema for ",operationId, " ", status_code})
-        assert(false, msg);
+        self:exit(msg);
     end
 
     local valid, err = check(json_body)
     if valid == false then
         local msg = table.concat({"response_validate_schema> schema check for ", operationId, " ", status_code, " failed: ",err})
-        assert(false, msg);
+        self:exit(msg);
     else 
         local msg = table.concat({"response_validate_schema> schema check for ", operationId, " ", status_code, ", PASS"})
         self:log_finish_succ(msg)
@@ -406,17 +412,17 @@ end
 
 function _M.response_to_json(self)
     if self._INNER.res == nil then 
-        assert(false, "response_to_json> no response")
+        self:exit("response_to_json> no response")
     end
 
     if self._INNER.res.body == nil then 
-        assert(false, "response_to_json> no response body")
+        self:exit("response_to_json> no response body")
     end
 
     local json_body, err = cjson.decode(self._INNER.res.body)
     if not json_body then
         local msg = table.concat({"response_to_json> not a json response: ", self._INNER.res.body})
-        assert(false, msg)
+        self:exit(msg)
     end
 
     return json_body

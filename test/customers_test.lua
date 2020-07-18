@@ -1,7 +1,7 @@
 local cjson = require("cjson.safe")
 local httptest = require("resty.http_test")
 
-local ht = httptest.new({ unit_name = "customer", host = "127.0.0.1", port = 8080 })
+local ht = httptest.new({ unit_name = "customer", host = "127.0.0.1", port = 8080})
 
 local info1 = {
   name = "winn",
@@ -75,5 +75,14 @@ function ht:test_008_delete_customer()
   self:get("/customers/" .. generated_id)
   self:response_have_status(404)
 end
+
+-- function ht:test_009_failed_test_example()
+--   self:post("/customers",{body = cjson.encode(info1)})
+--   self:response_have_status(200)
+--   self:response_validate_schema("addCustomer")
+
+--   -- failed test
+--   self:response_validate_schema("getAllCustomer")
+-- end
 
 ht:run()
