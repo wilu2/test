@@ -1,0 +1,7 @@
+image: openresty/openresty:bionic
+
+test:
+  script:
+    - openresty -c conf/nginx.conf -p `pwd`
+    - cd test/
+    - resty customers_test.lua
