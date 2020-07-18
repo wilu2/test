@@ -1,7 +1,7 @@
 local db = require("db")
 ngx.req.discard_body()
 
-local id = string.match(ngx.var.uri, "(%d+)$")
+local id = ngx.re.match(ngx.var.uri, "[0-9]+")[0]
 local info = db:get(id)
 
 if info == nil then

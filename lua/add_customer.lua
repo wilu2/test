@@ -9,4 +9,4 @@ local info = ngx.req.get_body_data()
 local id = db:add(info)
 
 ngx.header["Content-Type"] = "application/json"
-ngx.say(cjson.encode({id = id}))
+ngx.print(cjson.encode({id = id}))
