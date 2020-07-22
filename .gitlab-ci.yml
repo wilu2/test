@@ -5,3 +5,9 @@ test:
     - openresty -c conf/nginx.conf -p `pwd`
     - cd test/
     - resty customers_test.lua
+
+busted:
+  image:
+    name: harbor.intsig.net/base/resty_busted
+  script:
+    - busted -p test_ -m example/?.lua example
