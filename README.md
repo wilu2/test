@@ -7,20 +7,26 @@
 建议使用 docker 安装测试环境
 
 ```bash
-sudo docker build -t http_test .
-sudo cp http_test.sh /usr/local/bin/http_test
-sudo chmod +x /usr/local/bin/http_test
+docker build -t http_test .
 ```
 
 进行测试
 
 ```bash
-http_test -p test_ -m "example/?.lua" example
+./http_test.sh -p test_ -m "example/?.lua" example
 ```
+
+>  http_test.sh 就是docker run的时候把当前目录映射到容器里，也可以将其拷贝到系统路径, 这样使用起来就像普通程序一样
+>
+> ```bash
+> sudo cp http_test.sh /usr/local/bin/http_test
+> sudo chmod +x /usr/local/bin/http_test
+> http_test -p test_ -m "example/?.lua" example
+> ```
 
 ### customer_test
 
-代码中附带了一个简单的 [会员管理系统](https://gitlab.intsig.net/tianxuan/mainstone/http_test/-/blob/add_http_assert/example/customer/doc/openapi.json) 以及对应的 [接口测试](https://gitlab.intsig.net/tianxuan/mainstone/http_test/-/blob/add_http_assert/example/customer_test.lua) . 你可以对应这接口文档来阅读测试代码,以便快速理解该测试框架
+代码中附带了一个简单的 [会员管理系统](https://gitlab.intsig.net/tianxuan/mainstone/http_test/-/blob/master/example/customer/doc/openapi.json) 以及对应的 [接口测试](https://gitlab.intsig.net/tianxuan/mainstone/http_test/-/blob/master/example/customer_test.lua) . 你可以对应这接口文档来阅读测试代码,以便快速理解该测试框架
 
 1. 启动 会员管理系统
 
@@ -42,8 +48,8 @@ http_test -p test_ -m "example/?.lua" example
 
 ## 使用
 
-1. [busted 相关测试](https://gitlab.intsig.net/tianxuan/mainstone/http_test/-/wikis/busted-相关测试)
-2. [http_test API](https://gitlab.intsig.net/tianxuan/mainstone/http_test/-/wikis/http_test-API)
+1. [busted 相关测试](https://gitlab.intsig.net/tianxuan/mainstone/http_test/-/blob/master/doc/busted.md)
+2. [http_test API](https://gitlab.intsig.net/tianxuan/mainstone/http_test/-/blob/master/doc/http_test_api.md)
 
 ### Gitlab CI集成
 
