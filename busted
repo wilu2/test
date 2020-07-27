@@ -1,0 +1,4 @@
+#!/usr/bin/env resty
+-- Busted command-line runner
+rawset(_G, 'lfs', false)
+require 'busted.runner'({ standalone = false })

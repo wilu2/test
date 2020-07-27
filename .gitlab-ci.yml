@@ -1,7 +1,17 @@
 image: openresty/openresty:bionic
 
-test:
+busted:
+  image:
+    name: harbor.intsig.net/base/resty_busted
   script:
-    - openresty -c conf/nginx.conf -p `pwd`
-    - cd test/
-    - resty customers_test.lua
+    - busted -p test_ -m example/?.lua example
+
+http_test_exapmle:
+  image:
+    name: harbor.intsig.net/base/resty_busted
+  before_script:
+    - luarocks install ljsonschema
+    - cp lib/http_test.lua /usr/local/openresty/lualib/
+  script:
+    - openresty  -p `pwd`/example/customer -c conf/nginx.conf
+    - busted example/customer_test.lua

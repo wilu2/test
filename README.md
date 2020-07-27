@@ -1,37 +1,50 @@
 # http_test
 
-基于 [resty-cli](https://github.com/openresty/resty-cli) 的 http 测试框架
+基于[busted](http://olivinelabs.com/busted/) 和 [resty-cli](https://github.com/openresty/resty-cli) 的 Lua 测试框架
 
-## 快速开始
+## 安装
 
-1. 启动http服务
+建议使用 docker 安装测试环境
 
-   ```shell
-   git clone http://gitlab.intsig.net/wenyanguang/http_test.git
-   cd http_test/
-   openresty -c conf/nginx.conf -p `pwd`
+```bash
+sudo docker build -t http_test .
+sudo cp http_test.sh /usr/local/bin/http_test
+sudo chmod +x /usr/local/bin/http_test
+```
+
+进行测试
+
+```bash
+http_test -p test_ -m "example/?.lua" example
+```
+
+### customer_test
+
+代码中附带了一个简单的 [会员管理系统](https://gitlab.intsig.net/tianxuan/mainstone/http_test/-/blob/add_http_assert/example/customer/doc/openapi.json) 以及对应的 [接口测试](https://gitlab.intsig.net/tianxuan/mainstone/http_test/-/blob/add_http_assert/example/customer_test.lua) . 你可以对应这接口文档来阅读测试代码,以便快速理解该测试框架
+
+1. 启动 会员管理系统
+
+   ```bash
+   docker run -d --workdir=$(pwd) \
+     -p 8080:8080 \
+     -v $(pwd):$(pwd) \
+     openresty/openresty:bionic \
+     openresty -p $(pwd)/example/customer -c conf/nginx.conf -g "daemon off;"
    ```
 
-2. 你可以访问 http://127.0.0.1:8080/ 来查看接口信息
+   > 关闭服务: docker stop $(docker container ls| grep 8080 | awk '{print $1}')
 
-3. http接口测试
+2. 运行接口测试
 
-   ```shell
-   cd test/
-   resty customers_test.lua
+   ```bash
+   http_test example/customer_test.lua
    ```
 
-   你可以试着修改 `customers_test.lua` 测试脚本, 然后再次运行测试
+## 使用
 
-## resty.http_test
+1. [busted 相关测试](https://gitlab.intsig.net/tianxuan/mainstone/http_test/-/wikis/busted-相关测试)
+2. [http_test API](https://gitlab.intsig.net/tianxuan/mainstone/http_test/-/wikis/http_test-API)
 
-目前提供有以下接口, 文档待补充, 使用示例见  `customers_test.lua`
+### Gitlab CI集成
 
-- put, get, post, delete
-
-- response_have_status  
-
-- response_validate_schema
-- response_to_json
-- assert_eq, assert_ne, assert_true, assert_false
-
+参考 `.gitlab-ci.yaml`
