@@ -1,40 +1,11 @@
 local http_test = require("http_test")
 local cjson = require("cjson.safe")
 local request = http_test.new({ host = "127.0.0.1", port = 8080 })
+local openapi =  request:get("/openapi.json"):to_json()
 
 local customer_info1 = { name="winn", phone="17566668888" }
 local customer_info2 = { name="winn", phone="17588886666" }
-local customer_id
-
-local customer_id_schema = {
-  type = "object",
-  properties = {
-    id = { type = "integer" }
-  },
-  required = {"id"}
-}
-
-local customer_info_schema = {
-  type = "object",
-  properties = {
-    name = { type = "string" },
-    phone = { type = "string" }
-  },
-  required = {"name", "phone"}
-}
-
-local customer_list_schema = {
-  type = "array",
-  items = {
-    type = "object",
-    properties = {
-      id = { type = "integer" },
-      name = { type = "string" },
-      phone = { type = "string" }
-    },
-    required = {"id", "name", "phone"}
-  }
-}
+local customer_id 
 
 test("The status is 406 when post body is invalid #add", function()
   local response =  request:post("/customers")
@@ -45,14 +16,15 @@ end)
 test("Add customer", function()
   local response = request:post("/customers", {body = cjson.encode(customer_info1)})
   assert.has_response_status(response, 200)
-  assert.is_validated_against_schema(response, customer_id_schema)
+  assert.is_validated_against_openapi(response, openapi)
+  -- assert.is_validated_against_schema(response, json_schema)
   customer_id = response:to_json().id
 end)
 
 test("Get customer by id", function()
   local response = request:get("/customers/" ..  customer_id)
   assert.has_response_status(response, 200)
-  assert.is_validated_against_schema(response, customer_info_schema)
+  assert.is_validated_against_openapi(response, openapi)
   assert.same(response:to_json(), customer_info1)
 end)
 
@@ -64,7 +36,7 @@ end)
 test("Get all customer", function()
   local response = request:get("/customers")
   assert.has_response_status(response, 200)
-  assert.is_validated_against_schema(response, customer_list_schema)
+  assert.is_validated_against_openapi(response, openapi)
 end)
 
 test("Update customer", function()
@@ -92,7 +64,6 @@ end)
 test("Delete customer", function()
   local response = request:delete("/customers/" .. customer_id)
   assert.has_response_status(response, 200)
-  
   -- Confirm that the delete was successful
   local response = request:get("/customers/" .. customer_id)
   assert.has_response_status(response, 404)

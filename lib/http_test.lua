@@ -53,7 +53,12 @@ local function request(self, url, opts, method)
         body = opts.body
     })
 
-    return setmetatable({res = res, err = err}, { __index = __response_meta })
+    return setmetatable({
+        res = res, 
+        err = err,
+        method = method, 
+        url = url,   
+    }, { __index = __response_meta })
 
 end
 
@@ -141,8 +146,134 @@ local function is_validated_against_schema(state, argv)
     return true
 end
 
+local function generate_validator_from_openapi(openapi, request_url, request_method, response_code, response_content_type)
+
+    request_method = string.lower(request_method)
+
+    if not (openapi and request_url and request_method and response_code and response_content_type) then 
+        return nil
+    end
+
+    if type(openapi) == 'string' then
+        -- TODO(yangguang_wen@intsig.net): support yaml
+        openapi = cjson.decode(openapi)
+    end 
+
+    if type(openapi) ~= 'table' then
+        return nil
+    end
+    
+    local validator
+
+    local matched_path = ""
+
+    for path, methods in pairs(openapi.paths) do
+        -- privent "/person/{id}}" matched "/person"
+        if #matched_path > #path then
+            break;
+        end
+
+        local pattern = path
+        for method, define in pairs(methods) do
+            if (method == request_method) then
+                local m_iter, err = ngx.re.gmatch(path, "{(.*?)}")
+                -- {id} -> [0-9]+
+                -- {name} -> [a-zA-Z]+
+                while true do
+                    local m, err = m_iter()
+                    if not m then
+                        break
+                    end
+
+                    local param_type
+                    if define.parameters then
+                        for _, param in pairs(define.parameters) do
+                            if param["in"] == "path" and param["name"] == m[1] then
+                                if param.schema then
+                                    param_type = param.schema.type
+                                end
+                            end
+                        end
+                    end
+
+                    local param_type_pattern
+                    if param_type == "integer" or param_type == "number" then
+                        param_type_pattern = "[0-9]+"
+                    elseif param_type == "string" then
+                        param_type_pattern = "[a-zA-Z]+"
+                    end
+                    
+                    if param_type_pattern then
+                        pattern = ngx.re.sub(path, m[0], param_type_pattern)
+                    end
+                end -- end of while
+    
+                if ngx.re.match(request_url, pattern) ~= nil then
+                    for code, response in pairs(define.responses) do
+                        if tonumber(code) == response_code then 
+                            if response.content and response.content[response_content_type] then
+                                local schema = {components = openapi.components}
+                                for k, v in pairs(response.content[response_content_type].schema) do
+                                    schema[k] = v
+                                end
+                                matched_path = path
+                                -- print(request_url, " matched ", path)
+                                validator = jsonschema.generate_validator(schema)
+                            end
+                        end
+                    end
+                end
+
+            end  -- end of method == request_method
+        end -- end of pairs(methods)
+    end -- end of pairs(openapi.paths)
+
+    return validator
+end
+
+local function is_validated_against_openapi(state, argv)
+    if not has_response(state, argv) then
+        return false
+    end
+
+    local r = argv[1]
+    local openapi = argv[2]
+
+    local content_type = r.res.headers["Content-Type"]
+    if content_type == nil then
+        state.failure_message = "\nNo Content-Type header in response"
+        return false
+    end
+    
+    local validator = generate_validator_from_openapi(openapi, r.url, r.method, r.res.status, content_type)
+
+    if validator == nil then
+        state.failure_message = table.concat({
+            "\nNo schema for", 
+            r.method, r.url, r.res.status, content_type
+        }, " ")
+        return false
+    end
+
+    local data, err = cjson.decode(r.res.body)
+    if err then
+        state.failure_message = table.concat({"\nInvalid json: ", err})
+        return false
+    end
+
+    local valid, err = validator(data)
+    if not valid then
+        state.failure_message = table.concat({
+            "\nJson validation failed: ",err})
+        return false
+    end
+
+    return true
+end
+
 register_assertion("has_response", has_response)
 register_assertion("has_response_status", has_response_status)
 register_assertion("is_validated_against_schema", is_validated_against_schema)
+register_assertion("is_validated_against_openapi", is_validated_against_openapi)
 
 return _M

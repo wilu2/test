@@ -156,7 +156,8 @@
               "type": "integer",
               "description": "会员ID"
             }
-          }
+          },
+          "required": ["id"]
         },
         "CustomersInfo": {
           "type": "object",
@@ -169,7 +170,8 @@
               "type": "string",
               "description": "手机号"
             }
-          }
+          },
+          "required": ["name", "phone"]
         }
       }
     }
