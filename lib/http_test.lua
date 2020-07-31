@@ -199,7 +199,7 @@ local function generate_validator_from_openapi(openapi, request_url, request_met
                     end
                     
                     if param_type_pattern then
-                        pattern = ngx.re.sub(path, m[0], param_type_pattern)
+                        pattern = ngx.re.sub(pattern, m[0], param_type_pattern)
                     end
                 end -- end of while
                 pattern =  table.concat({"^", pattern, "$"})

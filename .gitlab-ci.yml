@@ -6,6 +6,15 @@ busted:
   script:
     - busted -p test_ -m example/?.lua example
 
+test:
+  image:
+    name: harbor.intsig.net/base/resty_busted
+  before_script:
+    - luarocks install ljsonschema
+    - cp lib/http_test.lua /usr/local/openresty/lualib/
+  script:
+    - busted test/*
+
 http_test_exapmle:
   image:
     name: harbor.intsig.net/base/resty_busted
