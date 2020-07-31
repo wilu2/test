@@ -168,11 +168,6 @@ local function generate_validator_from_openapi(openapi, request_url, request_met
     local matched_path = ""
 
     for path, methods in pairs(openapi.paths) do
-        -- privent "/person/{id}}" matched "/person"
-        if #matched_path > #path then
-            break;
-        end
-
         local pattern = path
         for method, define in pairs(methods) do
             if (method == request_method) then
@@ -200,14 +195,14 @@ local function generate_validator_from_openapi(openapi, request_url, request_met
                     if param_type == "integer" or param_type == "number" then
                         param_type_pattern = "[0-9]+"
                     elseif param_type == "string" then
-                        param_type_pattern = "[a-zA-Z]+"
+                        param_type_pattern = "[^/]+"
                     end
                     
                     if param_type_pattern then
                         pattern = ngx.re.sub(path, m[0], param_type_pattern)
                     end
                 end -- end of while
-    
+                pattern =  table.concat({"^", pattern, "$"})
                 if ngx.re.match(request_url, pattern) ~= nil then
                     for code, response in pairs(define.responses) do
                         if tonumber(code) == response_code then 
