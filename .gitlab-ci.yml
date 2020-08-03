@@ -4,7 +4,7 @@ before_script:
     - luarocks install ljsonschema
     - luarocks --server=http://rocks.moonscript.org install lyaml
     - cp lib/http_test.lua /usr/local/openresty/lualib/
-
+    - cp busted /usr/local/openresty/luajit/bin/busted
 busted:
   script:
     - busted -p test_ -m example/?.lua example

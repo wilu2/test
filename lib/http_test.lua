@@ -156,11 +156,8 @@ local function generate_validator_from_openapi(openapi, request_url, request_met
     end
 
     if type(openapi) == 'string' then
-        local origin = openapi
-        openapi = cjson.decode(openapi)
-        if openapi == nil then
-            openapi = lyaml.load(origin)
-        end
+        -- it can parse json or yaml. (json is a subset of yaml)
+        openapi = lyaml.load(openapi)
     end 
 
     if type(openapi) ~= 'table' then
