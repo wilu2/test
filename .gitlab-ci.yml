@@ -1,28 +1,19 @@
-image: openresty/openresty:bionic
+image: harbor.intsig.net/base/resty_busted
+
+before_script:
+    - luarocks install ljsonschema
+    - luarocks --server=http://rocks.moonscript.org install lyaml
+    - cp lib/http_test.lua /usr/local/openresty/lualib/
 
 busted:
-  image:
-    name: harbor.intsig.net/base/resty_busted
   script:
     - busted -p test_ -m example/?.lua example
 
 test:
-  image:
-    name: harbor.intsig.net/base/resty_busted
-  before_script:
-    - luarocks install ljsonschema
-    - luarocks --server=http://rocks.moonscript.org install lyaml
-    - cp lib/http_test.lua /usr/local/openresty/lualib/
   script:
     - busted test/*
 
 http_test_exapmle:
-  image:
-    name: harbor.intsig.net/base/resty_busted
-  before_script:
-    - luarocks install ljsonschema
-    - luarocks --server=http://rocks.moonscript.org install lyaml
-    - cp lib/http_test.lua /usr/local/openresty/lualib/
   script:
     - openresty  -p `pwd`/example/customer -c conf/nginx.conf
     - busted example/customer_test.lua
