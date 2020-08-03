@@ -1,4 +1,5 @@
 #!/usr/bin/env resty
 -- Busted command-line runner
 rawset(_G, 'lfs', false)
+rawset(_G, 'yaml', {})
 require 'busted.runner'({ standalone = false })

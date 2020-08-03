@@ -8,6 +8,7 @@ local assert = require("luassert")
 local jsonschema = require("jsonschema")
 local cjson = require("cjson.safe")
 local http = require("resty.http")
+local lyaml = require("lyaml")
 
 local _M = {
     _VERSION = '0.02',
@@ -155,8 +156,11 @@ local function generate_validator_from_openapi(openapi, request_url, request_met
     end
 
     if type(openapi) == 'string' then
-        -- TODO(yangguang_wen@intsig.net): support yaml
+        local origin = openapi
         openapi = cjson.decode(openapi)
+        if openapi == nil then
+            openapi = lyaml.load(origin)
+        end
     end 
 
     if type(openapi) ~= 'table' then
