@@ -32,6 +32,14 @@ local __response_meta = {
     
         return json_body
     end,
+
+    body = function(self)
+        return self.res.body
+    end,
+
+    headers = function(self)
+        return self.res.headers
+    end,
 }
 
 local mt = { __index = _M }
@@ -132,6 +140,7 @@ local function is_validated_against_schema(state, argv)
         return false
     end
 
+    -- TODO(yangguang_wen@intsig.net): parse string and number type
     local data, err = cjson.decode(response.res.body)
     if err then
         state.failure_message = table.concat({"\nInvalid json: ", err})

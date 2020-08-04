@@ -1,8 +1,6 @@
 image: harbor.intsig.net/base/resty_busted
 
 before_script:
-    - luarocks install ljsonschema
-    - luarocks --server=http://rocks.moonscript.org install lyaml
     - cp lib/http_test.lua /usr/local/openresty/lualib/
     - cp busted /usr/local/openresty/luajit/bin/busted
 busted:
@@ -10,7 +8,11 @@ busted:
     - busted -p test_ -m example/?.lua example
 
 test:
+  services:
+    - name: kennethreitz/httpbin
+      alias: httpbin
   script:
+    - export HTTPBIN_SERIVCE_IP=$(cat /etc/hosts | awk '{if ($2 == "httpbin") print $1;}')
     - busted test/*
 
 http_test_exapmle:
