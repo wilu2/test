@@ -1,13 +1,25 @@
 image: harbor.intsig.net/base/resty_busted
 
+stages: 
+  - test
+  - push
+
+services:
+  - docker:dind
+
+variables:
+  DOCKER_TLS_CERTDIR: ""
+
 before_script:
     - cp lib/http_test.lua /usr/local/openresty/lualib/
     - cp busted /usr/local/openresty/luajit/bin/busted
 busted:
+  stage: test
   script:
     - busted -p test_ -m example/?.lua example
 
 test:
+  stage: test
   services:
     - name: kennethreitz/httpbin
       alias: httpbin
@@ -16,6 +28,22 @@ test:
     - busted test/*
 
 http_test_exapmle:
+  stage: test
   script:
     - openresty  -p `pwd`/example/customer -c conf/nginx.conf
     - busted example/customer_test.lua
+
+push_harbor:
+  stage: push
+  image: docker
+  before_script:
+    - docker login -u $CI_HARBOR_USER -p $CI_HARBOR_PASSWORD harbor.intsig.net/base
+  script: 
+    - echo "LABEL commit-sha.$CI_PROJECT_PATH_SLUG=$CI_COMMIT_SHA" >> $CI_PROJECT_DIR/Dockerfile
+    - docker build -f $CI_PROJECT_DIR/Dockerfile -t harbor.intsig.net/base/resty_busted:$CI_COMMIT_TAG $CI_PROJECT_DIR
+    - docker tag harbor.intsig.net/base/resty_busted:$CI_COMMIT_TAG harbor.intsig.net/base/resty_busted:latest
+    - docker push harbor.intsig.net/base/resty_busted:$CI_COMMIT_TAG
+    - docker push harbor.intsig.net/base/resty_busted:latest
+  only: 
+    - tags
+  
