@@ -156,6 +156,18 @@ local function is_validated_against_schema(state, argv)
     return true
 end
 
+local function deref_response(openapi, ref)
+    local temp = openapi
+    local m_iter, err = ngx.re.gmatch(ref, "/([^/]+)")
+    local schema
+    while true do 
+        local m, err = m_iter()
+        if not m then break end
+        temp = temp[m[1]]
+    end
+    return temp
+end
+
 local function generate_validator_from_openapi(openapi, request_url, request_method, response_code, response_content_type)
 
     request_method = string.lower(request_method)
@@ -216,6 +228,10 @@ local function generate_validator_from_openapi(openapi, request_url, request_met
                 if ngx.re.match(request_url, pattern) ~= nil then
                     for code, response in pairs(define.responses) do
                         if tonumber(code) == response_code then 
+                            if response["$ref"] then
+                                response = deref_response(openapi, response["$ref"])
+                            end
+
                             if response.content and response.content[response_content_type] then
                                 local schema = {components = openapi.components}
                                 for k, v in pairs(response.content[response_content_type].schema) do
