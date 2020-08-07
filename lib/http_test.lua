@@ -228,7 +228,8 @@ local function generate_validator_from_openapi(openapi, request_url, request_met
                 if ngx.re.match(request_url, pattern) ~= nil then
                     for code, response in pairs(define.responses) do
                         if tonumber(code) == response_code then 
-                            if response["$ref"] then
+                            -- now, only support local reference and no escape characters
+                            if response["$ref"] and ngx.re.match(response["$ref"], "^#/") then
                                 response = deref_response(openapi, response["$ref"])
                             end
 
