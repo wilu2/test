@@ -4,19 +4,13 @@ stages:
   - test
   - push
 
-services:
-  - docker:dind
-
-variables:
-  DOCKER_TLS_CERTDIR: ""
-
 before_script:
     - cp lib/http_test.lua /usr/local/openresty/lualib/
     - cp busted /usr/local/openresty/luajit/bin/busted
 busted:
   stage: test
   script:
-    - busted -p test_ -m example/?.lua example
+    - busted -m example/?.lua example/test_*.lua
 
 test:
   stage: test
@@ -34,6 +28,13 @@ http_test_exapmle:
     - busted example/customer_test.lua
 
 push_harbor:
+
+  services:
+    - docker:dind
+
+  variables:
+    DOCKER_TLS_CERTDIR: ""
+
   stage: push
   image: docker
   before_script:

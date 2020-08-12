@@ -46,20 +46,22 @@ local mt = { __index = _M }
 
 function _M.new(opts)
     opts = opts or {}
+    local schema = opts.schema or "http"
     local host = opts.host
-    local port = opts.port or 80
-    return setmetatable({ host = host, port = port}, mt)
+    local port = opts.port or (schema == "https" and 443 or 80)
+    return setmetatable({schema = schema, host = host, port = port}, mt)
 end
 
 -- reqeust function
 local function request(self, url, opts, method)
     opts = opts or {}
-    local request_url = table.concat({"http://", self.host, ":", self.port,  url})
+    local request_url = table.concat({self.schema, "://", self.host, ":", self.port,  url})
     local httpc = http.new()
     local res, err = httpc:request_uri(request_url,{
         method = method,
         headers = opts.headers,
-        body = opts.body
+        body = opts.body,
+        ssl_verify = false
     })
 
     return setmetatable({
