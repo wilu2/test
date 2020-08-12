@@ -28,10 +28,10 @@ components:
     # Schema for error response body
     Unauthorized:
       type: integer
-      enmu: [404]
+      enum: [404]
     NotFound:
       type: integer
-      enmu: [406]
+      enum: [406]
 ]=]
 
 -- mock response
@@ -52,4 +52,5 @@ end
 test("resuing_responses_ref_test", function()
   assert.is_validated_against_openapi(res("/ref_test", "GET", 404, "application/json", "404"), openapi)
   assert.is_validated_against_openapi(res("/ref_test", "GET", 406, "application/json", "406"), openapi)
+  assert.are_not.is_validated_against_openapi(res("/ref_test", "GET", 404, "application/json", "406"), openapi)
 end)
