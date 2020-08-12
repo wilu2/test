@@ -10,7 +10,7 @@
 
   `params` 是一个lua table, 接收一下字段
 
-  - `schema` 请求协议，http 或者 https， 默认为http
+  - `scheme` 请求协议，http 或者 https， 默认为http
   - `host` 请求域名
   - `port` 请求端口
 
