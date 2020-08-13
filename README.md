@@ -13,7 +13,7 @@ docker build -t http_test .
 进行测试
 
 ```bash
-./http_test.sh -p test_ -m "example/?.lua" example
+./http_test.sh -m "example/?.lua" example/test_*.lua
 ```
 
 >  http_test.sh 就是docker run的时候把当前目录映射到容器里，也可以将其拷贝到系统路径, 这样使用起来就像普通程序一样
@@ -21,7 +21,7 @@ docker build -t http_test .
 > ```bash
 > sudo cp http_test.sh /usr/local/bin/http_test
 > sudo chmod +x /usr/local/bin/http_test
-> http_test -p test_ -m "example/?.lua" example
+> http_test -m "example/?.lua" example/test_*.lua
 > ```
 
 ### customer_test

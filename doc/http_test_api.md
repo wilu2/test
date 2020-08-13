@@ -46,21 +46,21 @@
 
 assert断言，下面的每个函数都需要传入`response` 作为第一个参数
 
-- **has_response_status()**
+- **response_status()**
 
-  `syntax: assert.has_response_status(response, code)`
+  `syntax: assert.response_status(response, code)`
 
   判断 http 响应码是否等于 code
 
-- **is_validated_against_schema()**
+- **validated_against_schema()**
 
-  `syntax: assert.is_validated_against_schema(response, json_schema)`
+  `syntax: assert.validated_against_schema(response, json_schema)`
 
   校验 http 相应的 schema, `json_schema` 可以是 lua table 或者是 json 字符串
 
-- **is_validated_against_openapi()**
+- **validated_against_openapi()**
 
-  `syntax: assert.is_validated_against_openapi(response, openapi)`
+  `syntax: assert.validated_against_openapi(response, openapi)`
 
   根据 openapi 校验响应格式是否正确。 openapi 可以是 lua table、json字符串、yaml字符串
 
@@ -68,4 +68,43 @@ assert断言，下面的每个函数都需要传入`response` 作为第一个参
 
   1. 目前根据实际的请求方法，url路径，响应码，响应 `Conent-Type` 头这几个字段 去openapi中寻找对应的schema，如果openapi中没有对应的schema，断言会失败。
   2. 目前只支持文档内的本地 `$ref ` 引用
+
+### 注意
+
+http_test 相关断言函数 用的是  [luassert library](http://olivinelabs.com/busted/#asserts) 它支持一些语法糖。比如一个断言函数声明为 `xxx()`  那么同时也支持一下函数,
+
+Is函数 它们与 `xxx()` 是等价的
+
+```lua
+assert.xxx()
+assert.is.xxx()
+assert.are.xxx()
+assert.has.xxx()
+assert.was.xxx()
+-- 也可以用 "_" 符号链接
+assert.is_xxx()
+assert.are_xxx()
+assert.has_xxx()
+assert.was_xxx()
+```
+
+Not 函数，与 is函数相反，是断言不成立的语法糖
+
+```lua
+assert.is_not.xxx()
+assert.are_not.xxx()
+assert.was_not.xxx()
+assert.has_no.xxx()
+-- 由于 "not" 是 lua 的关键字，所以不支持 "is.not" 类似的语法
+```
+
+写测试的时候，可以用适当的语法糖增加测试的可读性，比如：
+
+```lua
+assert.has.response_status()
+assert.has_no.response_status()
+
+assert.is.validated_against_openapi()
+assert.is_not.validated_against_openapi()
+```
 
