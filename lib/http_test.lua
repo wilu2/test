@@ -34,11 +34,19 @@ local __response_meta = {
     end,
 
     body = function(self)
-        return self.res.body
+        if self.res then 
+            return self.res.body
+        else
+            return nil
+        end
     end,
 
     headers = function(self)
-        return self.res.headers
+        if self.res then 
+            return self.res.headers
+        else
+            return nil
+        end
     end,
 }
 
