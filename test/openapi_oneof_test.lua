@@ -83,7 +83,7 @@ local function res(url, method, status, content, body)
 end
 
 test("oneof_test", function()
-  assert.is_validated_against_openapi(res("/oneof_test", "GET", 200, "text/plain", rectangle), openapi)
-  assert.is_validated_against_openapi(res("/oneof_test", "GET", 200, "text/plain", sector), openapi)
-  assert.are_not.is_validated_against_openapi(res("/oneof_test", "GET", 200, "text/plain", invalid_shape), openapi)
+  assert.is.validated_against_openapi(res("/oneof_test", "GET", 200, "text/plain", rectangle), openapi)
+  assert.is.validated_against_openapi(res("/oneof_test", "GET", 200, "text/plain", sector), openapi)
+  assert.is_not.validated_against_openapi(res("/oneof_test", "GET", 200, "text/plain", invalid_shape), openapi)
 end)

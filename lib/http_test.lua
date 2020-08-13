@@ -295,9 +295,9 @@ local function is_validated_against_openapi(state, argv)
     return true
 end
 
-register_assertion("has_response", has_response)
-register_assertion("has_response_status", has_response_status)
-register_assertion("is_validated_against_schema", is_validated_against_schema)
-register_assertion("is_validated_against_openapi", is_validated_against_openapi)
+register_assertion("response", has_response)
+register_assertion("response_status", has_response_status)
+register_assertion("validated_against_schema", is_validated_against_schema)
+register_assertion("validated_against_openapi", is_validated_against_openapi)
 
 return _M

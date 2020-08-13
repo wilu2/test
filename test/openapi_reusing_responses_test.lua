@@ -50,7 +50,7 @@ local function res(url, method, status, content, body)
 end
 
 test("resuing_responses_ref_test", function()
-  assert.is_validated_against_openapi(res("/ref_test", "GET", 404, "application/json", "404"), openapi)
-  assert.is_validated_against_openapi(res("/ref_test", "GET", 406, "application/json", "406"), openapi)
-  assert.are_not.is_validated_against_openapi(res("/ref_test", "GET", 404, "application/json", "406"), openapi)
+  assert.is.validated_against_openapi(res("/ref_test", "GET", 404, "application/json", "404"), openapi)
+  assert.is.validated_against_openapi(res("/ref_test", "GET", 406, "application/json", "406"), openapi)
+  assert.is_not.validated_against_openapi(res("/ref_test", "GET", 404, "application/json", "406"), openapi)
 end)

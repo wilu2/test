@@ -164,31 +164,31 @@ end
 -- GET /customers/bad 200 text/plain falied
 
 test("t1", function()
-  assert.is_validated_against_openapi(res("/customers", "GET", 200, "text/plain", "1"), openapi)
+  assert.is.validated_against_openapi(res("/customers", "GET", 200, "text/plain", "1"), openapi)
 end)
 
 test("t2", function()
-  assert.is_validated_against_openapi(res("/customers", "GET", 200, "application/json", "2"), openapi)
+  assert.is.validated_against_openapi(res("/customers", "GET", 200, "application/json", "2"), openapi)
 end)
 
 test("t3", function()
-  assert.is_validated_against_openapi(res("/customers", "GET", 400, "text/plain", "3"), openapi)
+  assert.is.validated_against_openapi(res("/customers", "GET", 400, "text/plain", "3"), openapi)
 end)
 
 test("t4", function()
-  assert.is_validated_against_openapi(res("/customers", "PUT", 200, "text/plain", "4"), openapi)
+  assert.is.validated_against_openapi(res("/customers", "PUT", 200, "text/plain", "4"), openapi)
 end)
 
 test("t5", function()
-  assert.is_validated_against_openapi(res("/customers/123", "GET", 200, "text/plain", "5"), openapi)
+  assert.is.validated_against_openapi(res("/customers/123", "GET", 200, "text/plain", "5"), openapi)
 end)
 
 test("t6", function()
-  assert.is_validated_against_openapi(res("/customers/123/purchase/eat", "GET", 200, "text/plain", "6"), openapi)
-  assert.is_validated_against_openapi(res("/customers/123/purchase/123", "GET", 200, "text/plain", "6"), openapi)
-  assert.is_validated_against_openapi(res("/customers/123/purchase/3.14eat", "GET", 200, "text/plain", "6"), openapi)
+  assert.is.validated_against_openapi(res("/customers/123/purchase/eat", "GET", 200, "text/plain", "6"), openapi)
+  assert.is.validated_against_openapi(res("/customers/123/purchase/123", "GET", 200, "text/plain", "6"), openapi)
+  assert.is.validated_against_openapi(res("/customers/123/purchase/3.14eat", "GET", 200, "text/plain", "6"), openapi)
 end)
 
 test("no schema matched", function()
-  assert.are_not.is_validated_against_openapi(res("/customers/eat", "GET", 200, "text/plain", "5"), openapi)
+  assert.is_not.validated_against_openapi(res("/customers/eat", "GET", 200, "text/plain", "5"), openapi)
 end)
