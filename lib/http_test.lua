@@ -69,6 +69,7 @@ local function request(self, url, opts, method)
         method = method,
         headers = opts.headers,
         body = opts.body,
+        query = opts.query,
         ssl_verify = false
     })
 
@@ -185,6 +186,7 @@ local function generate_validator_from_openapi(openapi, request_url, request_met
     if not (openapi and request_url and request_method and response_code and response_content_type) then 
         return nil
     end
+    request_url = ngx.re.gsub(request_url,"\\?.*","")
 
     if type(openapi) == 'string' then
         -- it can parse json or yaml. (json is a subset of yaml)
