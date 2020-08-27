@@ -192,3 +192,9 @@ end)
 test("no schema matched", function()
   assert.is_not.validated_against_openapi(res("/customers/eat", "GET", 200, "text/plain", "5"), openapi)
 end)
+
+test("query test", function()
+  assert.is.validated_against_openapi(res("/customers?query=a&b=1", "GET", 200, "text/plain", "1"), openapi)
+  assert.is.validated_against_openapi(res("/customers?url=https://github.com/test?a=2", "GET", 200, "text/plain", "1"), openapi)
+
+end)
