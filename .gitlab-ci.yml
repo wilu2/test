@@ -7,11 +7,12 @@ stages:
 before_script:
     - cp lib/http_test.lua /usr/local/openresty/lualib/
     - cp lib/nginx.lua /usr/local/openresty/lualib/
+    - cp lib/mockserver.lua /usr/local/openresty/lualib/
     - cp busted /usr/local/openresty/luajit/bin/busted
 busted:
   stage: test
   script:
-    - busted -m example/?.lua example/test_*.lua
+    - busted -m  example/?.lua example/test_*.lua 
 
 test:
   stage: test
@@ -28,6 +29,17 @@ http_test_exapmle:
   script:
     - openresty  -p `pwd`/example/customer -c conf/nginx.conf
     - busted example/customer_test.lua
+
+mock_test:
+  stage: test
+  services:
+    - name: mockserver/mockserver
+      alias: mockserver
+      command: ["-logLevel", "INFO", "-serverPort","1080"]
+      
+  script:
+    - export MOCKSERVER_IP=$(cat /etc/hosts | awk '{if ($2 == "mockserver") print $1;}')
+    - busted -m example/?.lua example/mock_test.lua
 
 push_harbor:
 
