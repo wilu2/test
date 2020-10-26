@@ -6,6 +6,7 @@ stages:
 
 before_script:
     - cp lib/http_test.lua /usr/local/openresty/lualib/
+    - cp lib/nginx.lua /usr/local/openresty/lualib/
     - cp busted /usr/local/openresty/luajit/bin/busted
 busted:
   stage: test
@@ -19,6 +20,7 @@ test:
       alias: httpbin
   script:
     - export HTTPBIN_SERIVCE_IP=$(cat /etc/hosts | awk '{if ($2 == "httpbin") print $1;}')
+    - luarocks install lua-resty-jit-uuid
     - busted test/*
 
 http_test_exapmle:
