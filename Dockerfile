@@ -9,4 +9,5 @@ RUN luarocks install busted && \
 ADD busted /usr/local/openresty/luajit/bin/busted
 RUN chmod +x /usr/local/openresty/luajit/bin/busted
 ADD lib/http_test.lua /usr/local/openresty/lualib/
+ADD lib/nginx.lua /usr/local/openresty/lualib/
 ENTRYPOINT []
