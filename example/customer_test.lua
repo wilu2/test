@@ -15,6 +15,14 @@ end)
 
 test("Add customer", function()
   local response = request:post("/customers", {body = cjson.encode(customer_info1)})
+  for k, v in pairs(response) do
+    print(k,"aaaaaaaaaaa",v)
+  end
+  for k, v in pairs(response.res) do
+    print(k,"aaaaaaaaaaa",v)
+  end
+  print(cjson.encode(response.res))
+  ngx.say(cjson.encode(response))
   assert.has_response_status(response, 200)
   assert.is_validated_against_openapi(response, openapi)
   -- assert.is_validated_against_schema(response, json_schema)
@@ -29,7 +37,7 @@ test("Get customer by id", function()
 end)
 
 test("The status is 404 when get non-existend customer", function()
-  local response = request:get("/customers/" ..  customer_id + 1)
+  local response = request:get("/customers/" ..  customer_id+1)
   assert.has_response_status(response, 404)
 end)
 

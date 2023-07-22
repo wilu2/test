@@ -3,3 +3,9 @@
 rawset(_G, 'lfs', false)
 rawset(_G, 'yaml', {})
 require 'busted.runner'({ standalone = false })
+-- require 'busted.runner'({ standalone = false }):
+ --这行代码通过 require 加载了 busted.runner 模块，并调用了它。
+ --busted.runner 是 Busted 框架的运行器，它将执行测试并输出结果。
+ --{ standalone = false } 是传递给 busted.runner 的选项参数，
+ --这里设置为 false 表示 Busted 不会以独立模式运行。
+--也许是因为该测试脚本是作为测试套件的一部分而不是独立运行的。

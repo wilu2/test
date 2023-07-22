@@ -1,5 +1,5 @@
 #FROM openresty/openresty:bionic
-FROM harbor.intsig.net/base/openresty:1.17.8.2-ubuntu20.04
+FROM registry.intsig.net/base/openresty:1.17.8.2-ubuntu20.04
 
 RUN luarocks install busted && \
     luarocks install lua-resty-http && \
